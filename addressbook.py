@@ -55,7 +55,7 @@ class Record:
         self._birthday = None
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
+        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}{", birthday: " + self.birthday.value if self.birthday else ""}."
 
     def add_phone(self, phone: str):
         try:
@@ -140,17 +140,15 @@ class AddressBook(UserDict):
 
         for contact in self.data.values():
             user_birthday_datetime = datetime.strptime(
-                contact.birthday, "%d.%m.%Y"
+                contact.birthday.value, "%d.%m.%Y"
             ).date()
             birthday_this_year = user_birthday_datetime.replace(year=today.year)
 
             if 0 <= ((birthday_this_year - today).days) < interval:
                 res.append(
                     {
-                        "name": contact["name"],
-                        "congratulation_date": birthday_this_year.strftime(
-                            "DD.MM.YYYY"
-                        ),
+                        "name": contact.name.value,
+                        "congratulation_date": birthday_this_year.strftime("%d.%m.%Y"),
                     }
                 )
         return sorted(res, key=lambda contact: contact["congratulation_date"])

@@ -12,7 +12,7 @@ def input_error(func):
         try:
             return func(*args, **kwargs)
         except ValueError:
-            return "Give me name and phone please."
+            return "Command or data entered incorrectly"
         except KeyError:
             return "User with this name not found"
         except IndexError:
@@ -38,22 +38,18 @@ def parse_input(user_input):
 
 @input_error
 def add_contact(args, book: AddressBook):
-    print("add-2")
     name, phone, *_ = args
-    print("add-3")
     record = book.find(name)
-    print("add-4")
     message = "Contact updated."
     if record is None:
-        print("add-5")
         record = Record(name)
-        print("add-5/1")
         book.add_record(record)
-        print("add-5/2")
         message = "Contact added."
     if phone:
-        print("add-6")
-        record.add_phone(phone)
+        try:
+            record.add_phone(phone)
+        except Exception as e:
+            print(f"Error: {e}")
     return message
 
 
@@ -75,6 +71,8 @@ def change_contact(args, book):
 def show_phone(args, book):
     name = args[0]
     record = book.find(name)
+    if not record:
+        raise ContactNotFoundError("Contact not found.")
     return record.find_all_phones()
 
 
@@ -111,7 +109,13 @@ def show_birthday(args, book):
 
 @input_error
 def birthdays(book):
-    return book.get_upcoming_birthdays()
+    birthday_list = book.get_upcoming_birthdays()
+    if birthday_list:
+        res = "Birthdays in the next 7 days:\n"
+        for contact in birthday_list:
+            res += f"Name: {contact["name"]} Congratulation date: {contact["congratulation_date"]}\n"
+        return res
+    return "There are no birthdays in the next 7 days."
 
 
 def main():
@@ -129,7 +133,6 @@ def main():
         elif command == "hello":
             print("How can I help you?")
         elif command == "add":
-            print("add-1")
             print(add_contact(args, book))
         elif command == "change":
             print(change_contact(args, book))
